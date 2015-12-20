@@ -9,19 +9,20 @@ var Wire = function() {
   this.cached = null;
 
   this.evaluate = function() {
-    console.log('Evaluating wire with source ' + this.source);
+    //console.log('Evaluating wire with source ' + this.source);
 
     if (this.cached) return this.cached; 
 
     if (!isNaN(this.source)) return parseInt(this.source);
     if (typeof this.source === 'object') {
       this.cached = this.source.evaluate();
-      console.log("Value of wire is " + this.cached);
+      console.log("Value wire of source " + this.source + " is " + this.cached);
       return this.cached;
     }
     
     this.cached = wires[this.source].evaluate();
-    console.log("Value of wire is " + this.cached);
+    
+    console.log("Value wire of source " + this.source + " is " + this.cached);
     return this.cached;
   };
 };
@@ -31,7 +32,9 @@ var NotGate = function(input, out) {
   this.input = input;
 
   this.evaluate = function() {
-    return ~wires[this.input];
+    this.cached = ~(wires[this.input].evaluate());
+    console.log("Inverting " + this.input + " yielded " + this.cached);
+    return this.cached;
   };
 
   this.toString = function() {

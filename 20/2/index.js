@@ -21,21 +21,21 @@ var process_house = function(num) {
 };
 
 /**/
-var num = 0;
+var num = 5040000;
 var val = 0;
 
 while (val < target) {
 
-  if ((num.toString().match(/0/g) || []).length < 3) {
-    ++num;
-    continue;
-  }
+  //if ((num.toString().match(/0/g) || []).length < 3) {
+  //  ++num;
+  //  continue;
+  //}
 
   val = process_house(num);
 
   console.log("House %d received %d gifts, within %s of target", num, val, target - val);
 
-  ++num;
+  --num;
 }
 
 console.log(num);

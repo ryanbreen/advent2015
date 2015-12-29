@@ -1,4 +1,5 @@
 var _ = require('underscore');
+var cluster = require('cluster');
 var target = parseInt(process.argv[2]);
 
 var process_house = function(num) {
@@ -20,25 +21,32 @@ var process_house = function(num) {
   }, 0);
 };
 
-/**/
 var num = 5040000;
-var val = 0;
 
-while (val < target) {
+var numCPUs = require('os').cpus().length;
+if (cluster.isMaster) {
+  // Fork workers.
+  for (var i = 0; i < numCPUs; i++) {
+    cluster.fork({NUM: num - i});
+  }
 
-  //if ((num.toString().match(/0/g) || []).length < 3) {
-  //  ++num;
-  //  continue;
-  //}
+  cluster.on('exit', function(worker, code, signal) {
+    console.log('worker ' + worker.process.pid + ' died');
+  });
+} else {
 
-  val = process_house(num);
+  /**/
+  var val = 0;
+  var num = process.env['NUM'];
 
-  console.log("House %d received %d gifts, within %s of target", num, val, target - val);
+  while (val < target) {
 
-  --num;
+    val = process_house(num);
+
+    if (num % 10000 === 0) console.log("House %d received %d gifts, within %s of target", num, val, target - val);
+
+    num -= numCPUs;
+  }
+
+  console.log(num);
 }
-
-console.log(num);
-/**/
-
-//console.log(process_house(8));

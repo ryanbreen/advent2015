@@ -5,8 +5,11 @@ var process_house = function(num) {
   // Find all elves that would match this house
   var elves = [];
 
-  for (var i = num; i > 0; --i) {
-    if (num % i === 0) elves.push(i);
+  for (var i = (Math.floor(Math.sqrt(num))); i > 0; --i) {
+    if (num % i === 0) {
+      elves.push(i);
+      if (num/i != i) elves.push(num/i);
+    }
   }
 
   //console.log(num);

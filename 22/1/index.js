@@ -16,10 +16,16 @@ var spells = [{
   name: "Shield",
   cost: 113,
   cast: function(effects, player, enemy) {
+    var this_obj = this;
     var counter = 6;
 
     effects.push(function() {
-      if (counter === 0) return;
+      if (counter === 0) {
+        delete player.active_spells[this_obj.name];
+        return;
+      }
+
+      player.active_spells[this_obj.name] = true;
 
       player.armor += 7;
 
@@ -30,10 +36,16 @@ var spells = [{
   name: "Poison",
   cost: 173,
   cast: function(effects, player, enemy) {
+    var this_obj = this;
     var counter = 6;
 
     effects.push(function() {
-      if (counter === 0) return;
+      if (counter === 0) {
+        delete player.active_spells[this_obj.name];
+        return;
+      }
+
+      player.active_spells[this_obj.name] = true;
 
       enemy.hp -= 3;
 
@@ -44,10 +56,16 @@ var spells = [{
   name: "Recharge",
   cost: 229,
   cast: function(effects, player, enemy) {
+    var this_obj = this;
     var counter = 5;
 
     effects.push(function() {
-      if (counter === 0) return;
+      if (counter === 0) {
+        delete player.active_spells[this_obj.name];
+        return;
+      }
+
+      player.active_spells[this_obj.name] = true;
 
       player.mana += 101;
 
@@ -98,6 +116,8 @@ var simulate = function(player, enemy) {
   var winner = null;
   var effects = [];
 
+  player.active_spells = {};
+
   while (spells.length > 0) {
     // Reset before running effects.
     player.armor = 0;
@@ -113,7 +133,14 @@ var simulate = function(player, enemy) {
 
     // Now run the chosen spell
     var spell_name = player.script.shift();
+
+    // Illegal move
+    if (player.active_spells[spell_name]) {
+      return enemy;
+    }
+
     var spell = spell_lookup[spell_name];
+
     console.log(spell)
 
     // Deduct cost
@@ -125,7 +152,7 @@ var simulate = function(player, enemy) {
     if (player.hp <=0) return enemy;
     if (enemy.hp <= 0) return player;
 
-    console.log("After player turn, player is at %d (%d mana) and enemy is at %s", player.hp, player.mana, enemy.hp);
+    //console.log("After player turn, player is at %d (%d mana) and enemy is at %s", player.hp, player.mana, enemy.hp);
 
     //
     // Boss turn
@@ -146,62 +173,67 @@ var simulate = function(player, enemy) {
     player.hp -= damage_dealt_by_enemy;
     if (player.hp <= 0) return enemy;
 
-    console.log("After boss turn, player is at %d (%d mana) and enemy is at %s", player.hp, player.mana, enemy.hp);
-  };
+    //console.log("After boss turn, player is at %d (%d mana) and enemy is at %s", player.hp, player.mana, enemy.hp);
+  }
+
+  return;
 };
 
-console.log(simulate(test2, test_boss).name);
+// console.log(simulate(test2, test_boss).name);
 
-/**
 var boss = {
   name: "boss",
-  hp: 103,
-  damage: 9,
-  armor: 2
+  hp: 51,
+  damage: 9
 };
 
 var combos = [];
 
-// Build an enumeration of all possible armor, ring, and weapon combos
-for (var i=-1; i<armor.length; ++i) {
-  // You must buy a weapon, so no skipping.
-  for (var j=0; j<weapons.length; ++j) {
-    for (var k=-1; k<rings1.length; ++k) {
-      for (var l=-1; l<rings2.length; ++l) {
-        var combo = {
-          hp: 100,
-          armor: 0,
-          damage: 0,
-          cost: 0
-        };
+/**
+combos[1] = [
+  [ "Magic Missile"],
+  [ "Drain"],
+  ...,
+  [ "Recharge"]
+]
+combos[2] = [
+  [ "Magic Missile", "Magic Missile"],
+  [ "Magic Missile", "Drain"],
+  ...,
+  [ "Recharge", "Recharge"]
+]
+**/
 
-        if (i != -1) {
-          combo.armor += armor[i].armor;
-          combo.cost += armor[i].cost;
-        }
-
-        combo.damage += weapons[j].damage;
-        combo.cost += weapons[j].cost;
-
-        if (k != -1) {
-          combo.armor += rings1[k].armor;
-          combo.damage += rings1[k].damage;
-          combo.cost += rings1[k].cost;
-        }
-
-        if (l != -1 && l !== k) {
-          combo.armor += rings2[l].armor;
-          combo.damage += rings2[l].damage;
-          combo.cost += rings2[l].cost;
-        }
-
-        combos.push(combo);
-      }
+function populate_arrays(parent, index) {
+  for (var i=0; i<parent.length * parent.length; ++i) {
+    for (var j=0; j<spells.length; ++j) {
+      parent[i][index+j] = spells[j].name;
     }
   }
 }
 
-console.log("There are %d possibilities", combos.length);
+// Build an enumeration, from 1 to 20, of every combination.
+for (var i=0; i<3; ++i) {
+  // At each level, build an array of all spell combinations.
+  combos[i] = [];
+  var permutations = Math.pow(spells.length, i);
+  for (var j=0; j<permutations; ++j) {
+    combos[i][j] = [];
+
+    for (var k=0; k<i; ++k) {
+      console.log("Setting %d-%d-%d to spell %d", i, j, k, Math.floor(j / spells.length));
+      combos[i][j][k] = spells[Math.floor(j / spells.length)].name;
+    }
+    
+  }
+
+}
+
+console.log("There are %d possibilities", combos[1].length);
+console.log(require('util').inspect(combos[1]));
+console.log(require('util').inspect(combos[2].length));
+console.log(require('util').inspect(combos[3].length));
+/**
 combos.sort(function(a, b) {
   return b.cost - a.cost;
 });

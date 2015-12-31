@@ -1,3 +1,5 @@
+var _ = require('underscore');
+var util = require('util');
 
 var spells = [{
   name: "Magic Missile",
@@ -118,7 +120,8 @@ var simulate = function(player, enemy) {
 
   player.active_spells = {};
 
-  while (spells.length > 0) {
+  while (player.script.length > 0) {
+
     // Reset before running effects.
     player.armor = 0;
 
@@ -140,8 +143,6 @@ var simulate = function(player, enemy) {
     }
 
     var spell = spell_lookup[spell_name];
-
-    console.log(spell)
 
     // Deduct cost
     player.mana -= spell.cost;
@@ -204,52 +205,71 @@ combos[2] = [
 ]
 **/
 
-function populate_arrays(parent, index) {
-  for (var i=0; i<parent.length * parent.length; ++i) {
-    for (var j=0; j<spells.length; ++j) {
-      parent[i][index+j] = spells[j].name;
-    }
+function fill_out_permutations_at_level(level, max) {
+
+  // Terminate condition
+  if (level === max) {
+    var rvalue = [];
+    spells.forEach(function(spell) {
+      rvalue.push([_.clone(spell)]);
+    });
+    return rvalue;
   }
+
+  var lower = fill_out_permutations_at_level(level+1, max);
+
+  // We now have an array of all combinations at the lower level.  Permute it at this level
+  // and return the new array.
+  var rvalue = [];
+  lower.forEach(function(lower_permutation) {
+    spells.forEach(function(spell) {
+      // Clone the lower_permutation and unshift it.
+      var new_permutation = _.clone(lower_permutation);
+      new_permutation.unshift(_.clone(spell));
+
+      rvalue.push(new_permutation);
+    });
+  });
+
+  return rvalue;
 }
 
-// Build an enumeration, from 1 to 20, of every combination.
-for (var i=0; i<3; ++i) {
-  // At each level, build an array of all spell combinations.
-  combos[i] = [];
-  var permutations = Math.pow(spells.length, i);
-  for (var j=0; j<permutations; ++j) {
-    combos[i][j] = [];
-
-    for (var k=0; k<i; ++k) {
-      console.log("Setting %d-%d-%d to spell %d", i, j, k, Math.floor(j / spells.length));
-      combos[i][j][k] = spells[Math.floor(j / spells.length)].name;
-    }
-    
-  }
-
+function fill_out_permutations(max) {
+  return fill_out_permutations_at_level(0, max);
 }
 
-console.log("There are %d possibilities", combos[1].length);
-console.log(require('util').inspect(combos[1]));
-console.log(require('util').inspect(combos[2].length));
-console.log(require('util').inspect(combos[3].length));
-/**
-combos.sort(function(a, b) {
-  return b.cost - a.cost;
-});
+//console.log(fill_out_permutations(1));
 
-console.log("Most expensive: %s", combos[0].cost);
-console.log("Least expensive: %s", combos[combos.length-1].cost);
+for (var i=0; i<10; ++i) {
 
-for (var i=0; i<combos.length; ++i) {
+  var permutations = fill_out_permutations(i);
+  permutations.sort(function(a, b) {
+    var reduce_fn = function(memo, spell) { 
+      return memo + spell.cost;
+    };
+    return _.reduce(a, reduce_fn, 0) - _.reduce(b, reduce_fn, 0);
+  });
 
-  // Reassert boss hp
-  boss.hp = 103;
+  permutations.forEach(function(permutation) {
+    var script = _.pluck(permutation, 'name');
+    var total_cost = _.reduce(_.pluck(permutation, 'cost'), function(memo, num) { return memo + num });
+    console.log("Testing with script of cost", total_cost);
+    var player = {
+      hp: 50,
+      mana: 500,
+      script: script
+    };
+    var result = simulate(player, boss);
+    if (result == player) {
+      console.log("Winning player is %s", util.inspect(player));
+      process.exit(0);
+    } else if (result == boss) {
+      console.log("Boss won");
+    } else {
+      console.log("Inconclusive");
+    }
 
-  if (simulate(combos[i], boss).name == "boss") {
-    break;
-  }
-};
+    boss.hp = 51;
+  });
 
-console.log("Most expensive loser is %s", require('util').inspect(combos[i]));
-**/
+}

@@ -1,5 +1,5 @@
 mod calendar;
 
 fn main() {
-    println!("{}", calendar::day1::run());
+    println!("{}", calendar::DAYS[0][0]());
 }

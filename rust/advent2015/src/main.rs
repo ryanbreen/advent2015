@@ -3,6 +3,6 @@ mod calendar;
 
 fn main() {
     let calendar = calendar::Calendar::new();
-    //println!("{}", calendar.days[0][0]());
     println!("There are {} days", calendar.days.len());
+    println!("{}", (calendar.days[0].part1.run)());
 }

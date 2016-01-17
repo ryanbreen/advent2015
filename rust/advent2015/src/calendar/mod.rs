@@ -1,8 +1,8 @@
 
 mod day1;
 
-struct Puzzle {
-  run: fn() -> String
+pub struct Puzzle {
+  pub run: fn() -> String
 }
 
 impl Puzzle {
@@ -14,7 +14,10 @@ impl Puzzle {
   }
 }
 
-pub struct Day(Puzzle, Puzzle);
+pub struct Day {
+  pub part1: Puzzle,
+  pub part2: Puzzle
+}
 
 pub struct Calendar {
   pub days: Vec<Day>
@@ -23,8 +26,11 @@ pub struct Calendar {
 impl Calendar {
   pub fn new() -> Calendar
   {
+    let mut days = Vec::new();
+    days.push(day1::day1);
+
     Calendar {
-      days: Vec::new()
+      days: days
     }
   }
 }

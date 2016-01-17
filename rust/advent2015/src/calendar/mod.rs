@@ -1,6 +1,31 @@
 
 mod day1;
 
-pub const DAYS: [[fn() -> String; 2]; 1] = [
-  [day1::run, day1::run]
-];
+struct Puzzle {
+  run: fn() -> String
+}
+
+impl Puzzle {
+  pub fn new(run: fn () -> String) -> Puzzle
+  {
+    Puzzle{
+      run: run
+    }
+  }
+}
+
+pub struct Day(Puzzle, Puzzle);
+
+pub struct Calendar {
+  pub days: Vec<Day>
+}
+
+impl Calendar {
+  pub fn new() -> Calendar
+  {
+    Calendar {
+      days: Vec::new()
+    }
+  }
+}
+

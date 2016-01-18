@@ -2,11 +2,11 @@
 mod day1;
 
 pub struct Puzzle {
-  pub run: fn() -> &'static str
+  pub run: fn() -> String
 }
 
 impl Puzzle {
-  pub fn new(run: fn () -> &'static str) -> Puzzle
+  pub fn new(run: fn () -> String) -> Puzzle
   {
     Puzzle{
       run: run

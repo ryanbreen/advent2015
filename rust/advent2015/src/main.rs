@@ -1,4 +1,4 @@
-#![feature(const_fn)]
+#![feature(const_fn, str_char, core)]
 mod calendar;
 
 fn main() {

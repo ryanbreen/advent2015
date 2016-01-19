@@ -27,13 +27,13 @@ fn main() {
       print_usage(&program, opts);
       return;
   }
-  let day = matches.opt_str("d").expect("Missing value");
-  let first_puzzle = matches.opt_str("p").expect("Missing value") == "0";
+  let day = matches.opt_str("d").expect("Missing value").parse::<usize>().unwrap();
+  let first_puzzle:bool = matches.opt_str("p").expect("Missing value") == "0";
 
   let calendar = calendar::Calendar::new();
   if first_puzzle {
-    println!("{}", (calendar.days[0].part1.run)(calendar.days[0].input));
+    println!("{}", (calendar.days[0].part1.run)(calendar.days[day].input));
   } else {
-    println!("{}", (calendar.days[0].part2.run)(calendar.days[0].input));
+    println!("{}", (calendar.days[0].part2.run)(calendar.days[day].input));
   }
 }

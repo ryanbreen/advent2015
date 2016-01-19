@@ -31,9 +31,20 @@ fn main() {
   let first_puzzle:bool = matches.opt_str("p").expect("Missing value") == "0";
 
   let calendar = calendar::Calendar::new();
-  if first_puzzle {
-    println!("{}", (calendar.days[0].part1.run)(calendar.days[day].input));
+
+  if day > calendar.days.len()-1 {
+    panic!("Invalid day {}", day);
+  }
+
+  let input= if matches.opt_present("i") {
+    matches.opt_str("i").expect("Missing value")
   } else {
-    println!("{}", (calendar.days[0].part2.run)(calendar.days[day].input));
+    calendar.days[day].input.to_string()
+  };
+
+  if first_puzzle {
+    println!("{}", (&(calendar.days[day]).part1.run)(input));
+  } else {
+    println!("{}", (&(calendar.days[day]).part2.run)(input));
   }
 }

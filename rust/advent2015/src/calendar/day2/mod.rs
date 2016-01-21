@@ -1,8 +1,7 @@
-use std::str::CharRange;
 
 fn calculate_wrapping_paper_needs (input: String) -> u32 {
 
-  let mut parts = input.split("x").collect::<Vec<&str>>();
+  let parts = input.split("x").collect::<Vec<&str>>();
 
   let mut sides = Vec::new();
   sides.push(parts[0].parse::<u32>().unwrap());
@@ -33,7 +32,7 @@ fn part1 (input: String) -> String  {
 
 fn calculate_ribbon_needs (input: String) -> u32 {
 
-  let mut parts = input.split("x").collect::<Vec<&str>>();
+  let parts = input.split("x").collect::<Vec<&str>>();
 
   let mut sides = Vec::new();
   sides.push(parts[0].parse::<u32>().unwrap());

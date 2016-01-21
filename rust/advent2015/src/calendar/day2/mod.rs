@@ -43,10 +43,9 @@ fn calculate_ribbon_needs (input: String) -> u32 {
   sides.sort();
 
   let mut total = 0;
-  total += sides[0]*sides[1]*2;
-  total += sides[1]*sides[2]*2;
-  total += sides[0]*sides[2]*2;
-  total += sides[0]*sides[1];
+  total += sides[0]*2;
+  total += sides[1]*2;
+  total += sides[0]*sides[1]*sides[2];
 
   return total;
 }

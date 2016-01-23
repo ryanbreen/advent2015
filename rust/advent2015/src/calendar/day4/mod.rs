@@ -22,7 +22,23 @@ fn part1 (input: String) -> String  {
 }
 
 fn part2 (input: String) -> String  {
-  return "noop".to_string();
+  let mut md5summer = Md5::new();
+  let mut inc = 0;
+  let mut out;
+
+  loop {
+    md5summer.input_str(&format!("{}{}", input, inc));
+
+    out = md5summer.result_str();
+    if out.starts_with("000000") {
+      break;
+    }
+
+    md5summer.reset();
+    inc+=1;
+  }
+
+  return inc.to_string();
 }
 
 pub fn fill() -> super::Day {

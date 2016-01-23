@@ -1,6 +1,8 @@
 #![feature(const_fn, str_char)]
 mod calendar;
 
+extern crate crypto;
+
 extern crate getopts;
 use getopts::Options;
 use std::env;

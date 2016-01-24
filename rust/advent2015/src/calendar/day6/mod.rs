@@ -1,11 +1,11 @@
 
-fn part1 (input: String) -> String  {
+enum Mode {
+  On,
+  Off,
+  Toggle
+}
 
-  enum Mode {
-    On,
-    Off,
-    Toggle
-  }
+fn part1 (input: String) -> String  {
 
   let mut houses = [ [false; 1000]; 1000];
   {
@@ -61,40 +61,35 @@ fn part1 (input: String) -> String  {
   return total.to_string()
 }
 
-fn part2 (input: String) -> String  {
-    enum Mode {
-    On,
-    Off,
-    Toggle
+fn operation(houses:& mut [[i32; 1000]; 1000], start:String, end:String, mode:Mode) {
+  let start_parts: Vec<&str> = start.split(',').collect();
+  let end_parts: Vec<&str> = end.split(',').collect();
+  let x1 = start_parts[0].parse::<usize>().unwrap();
+  let x2 = end_parts[0].parse::<usize>().unwrap();
+  let y1 = start_parts[1].parse::<usize>().unwrap();
+  let y2 = end_parts[1].parse::<usize>().unwrap();
+
+  for x in x1..x2+1 {
+    for y in y1..y2+1 {
+      match mode {
+        Mode::On => houses[x][y] = houses[x][y] + 1,
+        Mode::Off => {
+          houses[x][y] = houses[x][y] - 1;
+          if houses[x][y] < 0 {
+            houses[x][y] = 0;
+          }
+        },
+        Mode::Toggle => houses[x][y] = houses[x][y] + 2,
+      };
+    }
   }
+}
 
-  let mut houses = [ [0; 1000]; 1000];
+fn part2 (input: String) -> String  {
+
+  let mut houses:[[i32; 1000]; 1000] = [ [0; 1000]; 1000];
   {
-    let mut operation = |start:String, end:String, mode:Mode| {
-      let start_parts: Vec<&str> = start.split(',').collect();
-      let end_parts: Vec<&str> = end.split(',').collect();
-      let x1 = start_parts[0].parse::<usize>().unwrap();
-      let x2 = end_parts[0].parse::<usize>().unwrap();
-      let y1 = start_parts[1].parse::<usize>().unwrap();
-      let y2 = end_parts[1].parse::<usize>().unwrap();
-
-      for x in x1..x2+1 {
-        for y in y1..y2+1 {
-          match mode {
-            Mode::On => houses[x][y] = houses[x][y] + 1,
-            Mode::Off => {
-              houses[x][y] = houses[x][y] - 1;
-              if houses[x][y] < 0 {
-                houses[x][y] = 0;
-              }
-            },
-            Mode::Toggle => houses[x][y] = houses[x][y] + 2,
-          };
-        }
-      }
-    };
-
-    operation("0,0".to_string(), "999,999".to_string(), Mode::Off);
+    operation(&mut houses, "0,0".to_string(), "999,999".to_string(), Mode::Off);
 
     let lines: Vec<&str> = input.lines().collect();
     for line in lines {
@@ -102,12 +97,12 @@ fn part2 (input: String) -> String  {
       match parts[0] {
         "turn" => {
           match parts[1] {
-            "on" => operation(parts[2].to_string(), parts[4].to_string(), Mode::On),
-            "off" => operation(parts[2].to_string(), parts[4].to_string(), Mode::Off),
+            "on" => operation(&mut houses, parts[2].to_string(), parts[4].to_string(), Mode::On),
+            "off" => operation(&mut houses, parts[2].to_string(), parts[4].to_string(), Mode::Off),
             _ => panic!("Failed to parse turn on/off field"),
           }
         },
-        "toggle" => operation(parts[1].to_string(), parts[3].to_string(), Mode::Toggle),
+        "toggle" => operation(&mut houses, parts[1].to_string(), parts[3].to_string(), Mode::Toggle),
         _ => panic!("Invalid operation!"),
       };
     }
@@ -135,4 +130,16 @@ pub fn fill() -> super::Day {
       run: part2,
     }
   };
+}
+
+#[test]
+fn test_part1() {
+  let day = fill();
+  assert_eq!((day.part1.run)(day.input.to_string()), "400410".to_string());
+}
+
+#[test]
+fn test_part2() {
+  let day = fill();
+  assert_eq!((day.part2.run)(day.input.to_string()), "3812909".to_string());
 }

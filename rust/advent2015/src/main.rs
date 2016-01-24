@@ -60,12 +60,7 @@ fn main() {
 }
 
 #[test]
-fn test_days() {
+fn calendar_test() {
   let calendar = calendar::Calendar::new();
-  assert!((&(calendar.days[0]).part1.run)(calendar.days[0].input.to_string()) == "232".to_string());
-  assert!((&(calendar.days[0]).part2.run)(calendar.days[0].input.to_string()) == "1783".to_string());
-  assert!((&(calendar.days[1]).part1.run)(calendar.days[1].input.to_string()) == "1598415".to_string());
-  assert!((&(calendar.days[1]).part2.run)(calendar.days[1].input.to_string()) == "3812909".to_string());
-  assert!((&(calendar.days[2]).part1.run)(calendar.days[2].input.to_string()) == "2572".to_string());
-  assert!((&(calendar.days[2]).part2.run)(calendar.days[2].input.to_string()) == "2631".to_string());
+  assert_eq!(calendar.days.len(), 6);
 }

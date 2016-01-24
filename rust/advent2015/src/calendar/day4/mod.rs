@@ -52,3 +52,10 @@ pub fn fill() -> super::Day {
     }
   };
 }
+
+#[test]
+fn test() {
+  let day = fill();
+  assert_eq!((day.part1.run)(day.input.to_string()), "254575".to_string());
+  assert_eq!((day.part2.run)(day.input.to_string()), "1038736".to_string());
+}

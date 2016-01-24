@@ -3,15 +3,23 @@ mod calendar;
 
 extern crate crypto;
 
+#[cfg(not(test))]
 extern crate getopts;
+
+#[cfg(not(test))]
 use getopts::Options;
+
+
+#[cfg(not(test))]
 use std::env;
 
+#[cfg(not(test))]
 fn print_usage(program: &str, opts: Options) {
   let brief = format!("Usage: {} [options]", program);
   print!("{}", opts.usage(&brief));
 }
 
+#[cfg(not(test))]
 fn main() {
   let args: Vec<String> = env::args().collect();
   let program = args[0].clone();
@@ -49,4 +57,15 @@ fn main() {
   } else {
     println!("{}", (&(calendar.days[day]).part2.run)(input));
   }
+}
+
+#[test]
+fn test_days() {
+  let calendar = calendar::Calendar::new();
+  assert!((&(calendar.days[0]).part1.run)(calendar.days[0].input.to_string()) == "232".to_string());
+  assert!((&(calendar.days[0]).part2.run)(calendar.days[0].input.to_string()) == "1783".to_string());
+  assert!((&(calendar.days[1]).part1.run)(calendar.days[1].input.to_string()) == "1598415".to_string());
+  assert!((&(calendar.days[1]).part2.run)(calendar.days[1].input.to_string()) == "3812909".to_string());
+  assert!((&(calendar.days[2]).part1.run)(calendar.days[2].input.to_string()) == "2572".to_string());
+  assert!((&(calendar.days[2]).part2.run)(calendar.days[2].input.to_string()) == "2631".to_string());
 }

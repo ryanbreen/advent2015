@@ -1,4 +1,5 @@
 use std::str::CharRange;
+use std::collections::HashSet;
 
 fn is_nice(name: String) -> bool {
   let mut i:usize = 0;
@@ -52,8 +53,52 @@ fn part1 (input: String) -> String  {
   return total.to_string()
 }
 
+fn is_nicer(name: String) -> bool {
+  let mut i:usize = 0;
+  let mut last_last_ch:char = '_';
+  let mut last_ch:char = '_';
+  let mut pairs = HashSet::new();
+  let mut pair_match:bool = false;
+  let mut dat_gap:bool = false;
+  while i < name.len() {
+      let CharRange {ch, next} = name.char_range_at(i);
+
+      if last_last_ch == ch {
+        dat_gap = true;
+      }
+
+      if pairs.contains(&format!("{}{}", last_ch, ch)) {
+        pair_match = true;
+      }
+
+      if last_last_ch != '_' {
+        // Add to hash
+        pairs.insert(format!("{}{}", last_last_ch, last_ch));
+      }
+
+      if last_ch != '_' {
+        last_last_ch = last_ch;
+      }
+
+      last_ch = ch;
+      i = next;
+  }
+
+  return pair_match && dat_gap;
+}
+
 fn part2 (input: String) -> String  {
-  return input;
+
+  let mut total = 0;
+
+  let lines: Vec<&str> = input.lines().collect();
+  for line in lines {
+    if is_nicer(line.to_string()) {
+      total += 1;
+    }
+  }
+
+  return total.to_string()
 }
 
 pub fn fill() -> super::Day {

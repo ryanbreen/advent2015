@@ -1,7 +1,6 @@
 
 fn part1 (input: String) -> String  {
 
-  #[derive(Debug)]
   enum Mode {
     On,
     Off,

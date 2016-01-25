@@ -141,5 +141,5 @@ fn test_part1() {
 #[test]
 fn test_part2() {
   let day = fill();
-  assert_eq!((day.part2.run)(day.input.to_string()), "3812909".to_string());
+  assert_eq!((day.part2.run)(day.input.to_string()), "15343601".to_string());
 }

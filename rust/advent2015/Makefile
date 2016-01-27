@@ -6,8 +6,7 @@ build:
 	@cargo build
 
 run: $(build)
-	cargo run
+	cargo run -- -d $(day) -p $(part)
 
 test:
-	export RUST_MIN_STACK=33554432
-	@cargo test
+	$(shell export RUST_MIN_STACK=33554432; cargo test)

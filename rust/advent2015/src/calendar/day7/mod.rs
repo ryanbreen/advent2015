@@ -1,12 +1,27 @@
 
 trait Gate {
-  // Static method signature; `Self` refers to the implementor type
-  fn new<T: Gate>(label: &'static str, input: T) -> Self;
-
-  fn input<T: Gate>(&self) -> T;
-
   fn calculate(&self) -> u16;
 }
+
+// A gate that takes a value or wire as its input
+struct PassthroughGate {
+  label: &'static str,
+  input: &'static str
+}
+
+impl PassthroughGate {
+  fn new(label: &'static str, input: &'static str) -> PassthroughGate {
+    PassthroughGate { label: label, input: input }
+  }
+}
+
+impl Gate for PassthroughGate {
+
+  fn calculate(&self) -> u16 {
+    0
+  }
+}
+
 
 fn part1 (input: String) -> String  {
   return input.to_string()

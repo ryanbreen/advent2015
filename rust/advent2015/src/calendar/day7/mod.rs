@@ -1,6 +1,19 @@
+use std::collections::HashMap;
 
 trait Gate {
   fn calculate(&self) -> u16;
+}
+
+struct GateKeeper {
+  gates: HashMap<&'static str, &'static Gate>
+}
+
+impl GateKeeper {
+  fn new() -> GateKeeper {
+    GateKeeper {
+      gates: HashMap::new()
+    }
+  }
 }
 
 // A gate that takes a value or wire as its input
@@ -24,6 +37,8 @@ impl Gate for PassthroughGate {
 
 
 fn part1 (input: String) -> String  {
+  let gk:GateKeeper = GateKeeper::new();
+
   return input.to_string()
 }
 

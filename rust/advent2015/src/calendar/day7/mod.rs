@@ -1,22 +1,11 @@
 use std::collections::HashMap;
 
 trait Gate {
-  fn calculate(&self) -> u16;
-}
-
-struct GateKeeper {
-  gates: HashMap<&'static str, &'static Gate>
-}
-
-impl GateKeeper {
-  fn new() -> GateKeeper {
-    GateKeeper {
-      gates: HashMap::new()
-    }
-  }
+  fn calculate(&self, &HashMap<&'static str, &Gate>) -> u16;
 }
 
 // A gate that takes a value or wire as its input
+#[derive(Hash, Eq, PartialEq, Debug)]
 struct PassthroughGate {
   label: &'static str,
   input: &'static str
@@ -29,17 +18,36 @@ impl PassthroughGate {
 }
 
 impl Gate for PassthroughGate {
-
-  fn calculate(&self) -> u16 {
-    0
+  fn calculate(&self, gates: &HashMap<&'static str, &Gate>) -> u16 {
+    match self.input.parse::<u16>() {
+      Ok(value) => return value,
+      Err(e) => {
+        println!("Looking for {}", self.input);
+        return gates[self.input].calculate(gates);
+      },
+    }
   }
 }
 
 
 fn part1 (input: String) -> String  {
-  let gk:GateKeeper = GateKeeper::new();
 
-  return input.to_string()
+  println!("Allocating values");
+
+  let a = PassthroughGate::new("a", "8");
+  let b = PassthroughGate::new("b", "a");
+
+  println!("Creating hash");
+
+  let mut gates:HashMap<&'static str, &Gate> = HashMap::new();
+  println!("Created hash");
+
+  gates.insert("a", &a);
+  gates.insert("b", &b);
+
+  println!("{}", b.calculate(&gates));
+
+  return "ok".to_string()
 }
 
 fn part2 (input: String) -> String  {

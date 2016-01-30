@@ -1,4 +1,4 @@
-#![feature(const_fn, str_char)]
+#![feature(box_syntax, const_fn, str_char)]
 mod calendar;
 
 extern crate crypto;

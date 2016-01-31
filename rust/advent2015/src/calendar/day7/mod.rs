@@ -38,8 +38,12 @@ impl Gate for PassthroughGate {
 
     let mut value:u16 = resolve_value(self.input.clone(), gates, cached_values);
     if self.not {
+      println!("Original: {:0>8b}", value);
       value = !value;
+      println!("Notted: {:0>8b}", value);
     }
+
+    println!("{} == {}", self.input, value);
 
     cached_values.insert(self.label.clone(), value);
 
@@ -80,6 +84,8 @@ impl Gate for LogicGate {
       "RSHIFT" => val = value_a >> value_b,
       _ => panic!("Unknown operator {}", self.operator),
     }
+
+    println!("{} {} {} == {}", value_a, self.operator, value_b, val);
 
     cached_values.insert(self.label.clone(), val);
     return val;

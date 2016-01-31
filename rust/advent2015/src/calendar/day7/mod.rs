@@ -76,7 +76,7 @@ impl Gate for LogicGate {
     println!("Attempting to resolve right leg {}", self.input_b);
     let value_b = resolve_value(self.input_b.clone(), gates, cached_values);
 
-    let mut val:u16;
+    let val:u16;
     match self.operator.as_ref() {
       "OR" => val = value_a | value_b,
       "AND" => val = value_a & value_b,
@@ -116,12 +116,34 @@ fn part1(input: String) -> String  {
   }
 
   let mut cached_values:HashMap<String, u16> = HashMap::new();
-  return gates["a"].calculate(&gates, &mut cached_values).to_string()
-  //return "ok".to_string();
+  return gates["a"].calculate(&gates, &mut cached_values).to_string();
 }
 
 fn part2 (input: String) -> String  {
-  return input.to_string()
+  let mut gates:HashMap<String, Box<Gate>> = HashMap::new();
+  let lines: Vec<&str> = input.lines().collect();
+  for line in lines {
+    let parts: Vec<&str> = line.split(' ').collect();
+    match parts.len() {
+      5 => {
+        println!("Adding gate that ends at {}: {} {} {}", parts[4], parts[1], parts[0], parts[2]);
+        gates.insert(parts[4].to_string(), Box::new(LogicGate::new(parts[4].to_string(),parts[1].to_string(), parts[0].to_string(), parts[2].to_string())));
+      },
+      4 => {
+        println!("Adding gate that ends at {}: NOT {}", parts[3], parts[1]);
+        gates.insert(parts[3].to_string(), Box::new(PassthroughGate::new(parts[3].to_string(),parts[1].to_string(), true)));
+      },
+      3 => {
+        println!("Adding gate that ends at {}: {}", parts[2], parts[0]);
+        gates.insert(parts[2].to_string(), Box::new(PassthroughGate::new(parts[2].to_string(),parts[0].to_string(), false)));
+      },
+      _ => panic!("Invalid operation!"),
+    };
+  }
+
+  let mut cached_values:HashMap<String, u16> = HashMap::new();
+  cached_values.insert("b".to_string(), 46065);
+  return gates["a"].calculate(&gates, &mut cached_values).to_string();
 }
 
 pub fn fill() -> super::Day {
@@ -139,11 +161,11 @@ pub fn fill() -> super::Day {
 #[test]
 fn test_part1() {
   let day = fill();
-  assert_eq!((day.part1.run)(day.input.to_string()), "400410".to_string());
+  assert_eq!((day.part1.run)(day.input.to_string()), "46065".to_string());
 }
 
 #[test]
 fn test_part2() {
   let day = fill();
-  assert_eq!((day.part2.run)(day.input.to_string()), "15343601".to_string());
+  assert_eq!((day.part2.run)(day.input.to_string()), "14134".to_string());
 }

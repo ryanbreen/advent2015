@@ -57,7 +57,28 @@ fn part1(input: String) -> String  {
 }
 
 fn part2 (input: String) -> String  {
-  return input.to_string();
+    let mut f = File::open(Path::new(&input)).unwrap();
+  let mut buffer = vec![0; 10];
+  // Read the whole file to figure out how many raw bytes we have.
+  let raw_len = f.read_to_end(&mut buffer).unwrap();
+
+  let mut buffer = String::new();
+  let mut f = File::open(Path::new(&input)).unwrap();
+  let _ = f.read_to_string(&mut buffer);
+
+  // Now count number of newlines
+  let lines: Vec<&str> = buffer.lines().collect();
+  let newline_count = lines.len() - 1;
+
+  let mut total_str = 0;
+
+  for line in lines {
+    let escaped = line.escape_default();
+    total_str += escaped.len() + 2;
+  }
+
+  let total_raw = raw_len - newline_count;
+  return (total_str - total_raw).to_string();
 }
 
 pub fn fill() -> super::Day {
@@ -75,11 +96,11 @@ pub fn fill() -> super::Day {
 #[test]
 fn test_part1() {
   let day = fill();
-  assert_eq!((day.part1.run)(day.input.to_string()), "46065".to_string());
+  assert_eq!((day.part1.run)(day.input.to_string()), "1342".to_string());
 }
 
 #[test]
 fn test_part2() {
   let day = fill();
-  assert_eq!((day.part2.run)(day.input.to_string()), "14134".to_string());
+  assert_eq!((day.part2.run)(day.input.to_string()), "2074".to_string());
 }

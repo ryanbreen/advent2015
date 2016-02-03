@@ -9,7 +9,6 @@ extern crate getopts;
 #[cfg(not(test))]
 use getopts::Options;
 
-
 #[cfg(not(test))]
 use std::env;
 

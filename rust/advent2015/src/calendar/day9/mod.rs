@@ -1,5 +1,27 @@
+use std::cmp::Ordering;
+use std::collections::BinaryHeap;
+use std::collections::HashMap;
+
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
+struct Route {
+  distance: u16,
+  destination: String
+}
+
+struct City {
+  name: String,
+  routes: Box<BinaryHeap<Route>>
+}
 
 fn part1(input: String) -> String  {
+  let mut cities:HashMap<String, City> = HashMap::new();
+
+  let lines: Vec<&str> = input.lines().collect();
+  for line in lines {
+    let parts: Vec<&str> = line.split(' ').collect();
+
+  }
+
   return input.to_string();
 }
 

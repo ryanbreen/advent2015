@@ -57,7 +57,7 @@ fn part1(input: String) -> String  {
 }
 
 fn part2 (input: String) -> String  {
-    let mut f = File::open(Path::new(&input)).unwrap();
+  let mut f = File::open(Path::new(&input)).unwrap();
   let mut buffer = vec![0; 10];
   // Read the whole file to figure out how many raw bytes we have.
   let raw_len = f.read_to_end(&mut buffer).unwrap();

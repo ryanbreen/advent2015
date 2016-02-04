@@ -1,5 +1,5 @@
-use std::cmp::Ordering;
-use std::collections::BinaryHeap;
+use core::borrow::BorrowMut;
+use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 use std::collections::HashSet;
@@ -14,8 +14,31 @@ struct Route {
 }
 
 struct City {
-  name: String,
-  routes: Box<BinaryHeap<Route>>
+  routes: Box<BTreeMap<Route, u16>>
+}
+
+fn test_route(start: &String, cities: &HashMap<String, City>) -> u16 {
+
+  let mut visited:HashSet<String> = HashSet::new();
+  visited.insert((*start).to_string());
+
+  let mut city = cities.get(start).unwrap();
+
+  let mut total:u16 = 0;
+
+  'outer: while visited.len() < cities.len() {
+    let ref routes:BTreeMap<Route, u16> = *(city.routes);
+    for (route, _) in routes.iter() {
+      if !visited.contains(&route.destination) {
+        visited.insert(route.destination.clone());
+        total += route.distance;
+        city = cities.get(&route.destination).unwrap();
+        continue 'outer;
+      }
+    }
+  }
+
+  return total;
 }
 
 fn part1(input: String) -> String  {
@@ -34,16 +57,25 @@ fn part1(input: String) -> String  {
     for route_legs in &route_parts {
       let city = match cities.entry(route_legs.0.to_string()) {
         Entry::Occupied(o) => o.into_mut(),
-        Entry::Vacant(v) => v.insert(City { name: route_legs.0.to_string(), routes: Box::new(BinaryHeap::new()) })
+        Entry::Vacant(v) => v.insert(City { routes: Box::new(BTreeMap::new()) })
       };
 
-      let my_route = Route { distance: parts[4].parse::<u16>().unwrap(), destination: route_legs.1.to_string() };
-      println!("{} {}", my_route.distance, my_route.destination);
+      let ref mut routes:BTreeMap<Route, u16> = *(city.routes.borrow_mut());
+      routes.insert(Route { distance: parts[4].parse::<u16>().unwrap(), destination: route_legs.1.to_string() }, 1);
     }
-
   }
 
-  return input.to_string();
+  // At this point, we have all of our cities and routes in a heap.  Let's iterate from city to city to
+  // find shortest path.
+  let mut lowest:u16 = 32767;
+  for (city_name, _) in &cities {
+    let current = test_route(&city_name, &cities);
+    if current < lowest {
+      lowest = current;
+    }
+  }
+
+  return lowest.to_string();
 }
 
 fn part2 (input: String) -> String  {

@@ -38,7 +38,12 @@ fn part1(input: String) -> String  {
 }
 
 fn part2 (input: String) -> String  {
-  return input;
+  let mut permuted = input;
+  for _ in 0..50 {
+    permuted = permute(permuted);
+  }
+
+  return permuted.len().to_string();
 }
 
 pub fn fill() -> super::Day {
@@ -56,11 +61,11 @@ pub fn fill() -> super::Day {
 #[test]
 fn test_part1() {
   let day = fill();
-  assert_eq!((day.part1.run)(day.input.to_string()), "117".to_string());
+  assert_eq!((day.part1.run)(day.input.to_string()), "329356".to_string());
 }
 
 #[test]
 fn test_part2() {
   let day = fill();
-  assert_eq!((day.part2.run)(day.input.to_string()), "909".to_string());
+  assert_eq!((day.part2.run)(day.input.to_string()), "4666278".to_string());
 }

@@ -7,8 +7,8 @@ fn to_base26(input: String) -> u64 {
   while i < input.len() {
     let CharRange {ch, next} = input.char_range_at(i);
     if ch < 'k' {
-      println!("{} {} {}", ch, (ch as u8), ((ch as u8) - 48) as char);
-      b26_str.push(((ch as u8) - 48) as char);
+      println!("{} {} {}", ch, (ch as u8), ((ch as u8) - 49) as char);
+      b26_str.push(((ch as u8) - 49) as char);
     } else {
       println!("{} {} {}", ch, (ch as u8), ((ch as u8) - 10) as char);
       b26_str.push(((ch as u8) - 10) as char);
@@ -32,16 +32,13 @@ fn from_base26(input: u64) -> String {
     let digit:u8 = (val % 26) as u8;
     val = val / 26;
 
-    if digit < 10 {
-      println!("{} {}", digit, ((digit + 48) as char));
-      b26_str.push((digit + 48) as char);
-    } else {
-      println!("{} {}", digit, ((digit + 97) as char));
-      b26_str.push((digit + 97) as char);
-    }
+    println!("{} {}", digit, ((digit + 97) as char));
+    b26_str.push((digit + 97) as char);
   }
 
-  return b26_str.to_string();
+  let mut vec = b26_str.into_bytes().clone();
+  vec.reverse();
+  return String::from_utf8(vec).unwrap();
 }
 
 fn is_valid(input: String) -> bool {

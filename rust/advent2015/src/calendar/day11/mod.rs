@@ -88,11 +88,11 @@ pub fn fill() -> super::Day {
 #[test]
 fn test_part1() {
   let day = fill();
-  assert_eq!((day.part1.run)(day.input.to_string()), "329356".to_string());
+  assert_eq!((day.part1.run)(day.input.to_string()), "hepxxyzz".to_string());
 }
 
 #[test]
 fn test_part2() {
   let day = fill();
-  assert_eq!((day.part2.run)(day.input.to_string()), "4666278".to_string());
+  assert_eq!((day.part2.run)(day.input.to_string()), "heqaabcc".to_string());
 }

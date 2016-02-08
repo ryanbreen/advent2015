@@ -1,92 +1,72 @@
-use std::str::CharRange;
 
-fn to_base26(input: String) -> u64 {
-  // Subtract every char down by 10.
-  let mut i:usize = 0;
-  let mut b26_str:String = String::new();
-  while i < input.len() {
-    let CharRange {ch, next} = input.char_range_at(i);
-    if ch < 'k' {
-      println!("{} {} {}", ch, (ch as u8), ((ch as u8) - 49) as char);
-      b26_str.push(((ch as u8) - 49) as char);
-    } else {
-      println!("{} {} {}", ch, (ch as u8), ((ch as u8) - 10) as char);
-      b26_str.push(((ch as u8) - 10) as char);
+fn is_valid(input: &Vec<u8>) -> bool {
+
+  let mut inc_count:u8 = 0;
+  let mut inc_gate_met:bool = false;
+
+  let mut previous_pair:u8 = 0;
+  let mut pair_gate_met:bool = false;
+
+  for i in 1..8 {
+    match input[i] {
+      105 | 108 | 111 => return false,
+      _ => {
+        if input[i] == (input[i-1]) + 1 // straight increment
+          || (input[i-1] == 104 && input[i] == 106)
+          || (input[i-1] == 107 && input[i] == 109)
+          || (input[i-1] == 110 && input[i] == 112) {
+          inc_count += 1;
+          if inc_count == 2 {
+            inc_gate_met = true;
+          }
+        } else {
+          inc_count = 0;
+        }
+
+        if input[i] == (input[i-1]) {
+          if previous_pair == input[i] {
+            // noop
+          } else if previous_pair == 0 {
+            previous_pair = input[i];
+          } else {
+            pair_gate_met = true;
+          }
+        }
+      }
     }
-    i = next;
   }
 
-  println!("{}", b26_str);
-
-  return u64::from_str_radix(&b26_str, 26).unwrap();
+  return inc_gate_met && pair_gate_met;
 }
 
-fn from_base26(input: u64) -> String {
+const MIN:u8 = 97;
+const MAX:u8 = 122;
+const MAXER:u8 = 123;
 
-  let mut b26_str:String = String::new();
-  let mut val = input;
-
-  println!("Converting {} to str", val);
-
-  while val > 0 {
-    let digit:u8 = (val % 26) as u8;
-    val = val / 26;
-
-    println!("{} {}", digit, ((digit + 97) as char));
-    b26_str.push((digit + 97) as char);
-  }
-
-  let mut vec = b26_str.into_bytes().clone();
-  vec.reverse();
-  return String::from_utf8(vec).unwrap();
-}
-
-fn is_valid(input: String) -> bool {
-
-  let mut i:usize = 1;
-  let CharRange {ch, ..} = input.char_range_at(0);
-  let mut last_char = ch;
-  let mut last_char_count:usize = 1;
-  let mut rvalue:String = String::new();
-
-  while i < input.len() {
-    let CharRange {ch, next} = input.char_range_at(i);
-    if ch != last_char {
-      // We need to add the count of the last char to the return string.
-      rvalue.push_str(&last_char_count.to_string());
-      rvalue.push(last_char);
-      last_char_count = 1;
-      last_char = ch;
-    } else {
-      last_char_count += 1;
+fn increment(bytes: &mut Vec<u8>) {
+  for i in 0..8 {
+    match bytes[7-i] {
+      MAX | MAXER => bytes[7-i] = MIN,
+      _ => {
+        bytes[7-i] += 1;
+        return;
+      },
     }
-    i = next;
   }
-
-  rvalue.push_str(&last_char_count.to_string());
-  rvalue.push(last_char);
-
-  return false;
-}
-
-fn increment(input: String) -> String {
-  return input;
 }
 
 fn find_next_valid(input: String) -> String {
-  let mut next = input;
+  let mut next = input.into_bytes();
   loop {
-    next = increment(next);
-    if is_valid(next.clone()) {
-      return next;
+    increment(&mut next);
+    if is_valid(&next) {
+      return String::from_utf8(next).unwrap();
     }
   }
 }
 
 fn part1(input: String) -> String  {
-//  return find_next_valid(input);
-  println!("Round-tripping {}", input);
-  return from_base26(to_base26(input));
+  return find_next_valid(input).to_string();
 }
 
 fn part2 (input: String) -> String  {

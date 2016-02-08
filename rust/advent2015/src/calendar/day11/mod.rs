@@ -70,7 +70,7 @@ fn part1(input: String) -> String  {
 }
 
 fn part2 (input: String) -> String  {
-  return find_next_valid(input);
+  return find_next_valid(find_next_valid(input));
 }
 
 pub fn fill() -> super::Day {

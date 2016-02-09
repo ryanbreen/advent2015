@@ -3,6 +3,7 @@ mod calendar;
 
 extern crate core;
 extern crate crypto;
+extern crate rustc_serialize;
 
 #[cfg(not(test))]
 extern crate getopts;
@@ -62,5 +63,5 @@ fn main() {
 #[test]
 fn calendar_test() {
   let calendar = calendar::Calendar::new();
-  assert_eq!(calendar.days.len(), 11);
+  assert_eq!(calendar.days.len(), 12);
 }

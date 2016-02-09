@@ -36,8 +36,51 @@ fn part1 (input: String) -> String {
   return total.to_string();
 }
 
+fn traverse_no_red_array (arr: &Vec<Json>, total: &mut i64) {
+  for value in arr.iter() {
+    match *value {
+      Json::I64(v) => *total += v,
+      Json::U64(v) => *total += v as i64,
+      Json::Object(ref v) => traverse_no_red_obj(v, total),
+      Json::Array(ref a) => traverse_no_red_array(a, total),
+      _ => {}
+    };
+  }
+}
+
+fn traverse_no_red_obj (obj: &BTreeMap<String, Json>, total: &mut i64) {
+
+  for (_, value) in obj.iter() {
+    match *value {
+      Json::String(ref v) => {
+        if v == "red" {
+          return;
+        }
+      },
+      _ => {}
+    };
+  }
+
+  for (_, value) in obj.iter() {
+    match *value {
+      Json::I64(v) => *total += v,
+      Json::U64(v) => *total += v as i64,
+      Json::Object(ref v) => traverse_no_red_obj(v, total),
+      Json::Array(ref a) => traverse_no_red_array(a, total),
+      _ => {}
+    };
+  }
+}
+
 fn part2 (input: String) -> String  {
-  return input.to_string();
+  let data = Json::from_str(&input).unwrap();
+  let obj = data.as_object().unwrap();
+
+  let mut total:i64 = 0;
+
+  traverse_no_red_obj(&obj, &mut total);
+
+  return total.to_string();
 }
 
 pub fn fill() -> super::Day {

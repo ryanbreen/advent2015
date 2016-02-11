@@ -15,13 +15,14 @@ struct Reindeer {
   rest_duration: u16,
   state: State,
   countdown: u16,
-  distance_traveled: u16
+  distance_traveled: u16,
+  points: u16
 }
 
 impl Reindeer {
   fn new(name: String, travel_rate: u8, travel_duration: u16, rest_duration: u16) -> Reindeer {
     Reindeer { name: name, travel_rate: travel_rate, travel_duration: travel_duration, rest_duration: rest_duration,
-      state: State::Travel, countdown: travel_duration, distance_traveled: 0 }
+      state: State::Travel, countdown: travel_duration, distance_traveled: 0, points: 0 }
   }
 
   fn tick(&mut self) {
@@ -45,6 +46,10 @@ impl Reindeer {
         }
       }
     }
+  }
+
+  fn award_point(&mut self) {
+    self.points += 1;
   }
 }
 
@@ -89,7 +94,49 @@ fn part2 (input: String) -> String {
   let mut f = File::open(Path::new(&input)).unwrap();
   let _ = f.read_to_string(&mut buffer);
 
-  return buffer;
+  let mut buffer = String::new();
+  let mut f = File::open(Path::new(&input)).unwrap();
+  let _ = f.read_to_string(&mut buffer);
+
+  let mut reindeer: Vec<Reindeer> = Vec::new();
+
+  let lines: Vec<&str> = buffer.lines().collect();
+  for line in lines {
+    let parts: Vec<&str> = line.split(' ').collect();
+    reindeer.push(Reindeer::new(
+      parts[0].to_string(),
+      parts[3].parse::<u8>().unwrap(),
+      parts[6].parse::<u16>().unwrap(),
+      parts[13].parse::<u16>().unwrap())
+    );
+  }
+
+  for _ in 0..2503 {
+    let mut highest = 0;
+    for deer in &mut reindeer {
+      deer.tick();
+      if deer.distance_traveled > highest {
+        highest = deer.distance_traveled;
+      }
+    }
+
+    for deer in &mut reindeer {
+      if highest == deer.distance_traveled {
+        deer.award_point();
+      }
+    }
+  }
+
+  let mut highest = 0;
+
+  for deer in &reindeer {
+    println!("{} has {} points", deer.name, deer.points);
+    if deer.points > highest {
+      highest = deer.points;
+    }
+  }
+
+  return highest.to_string();
 }
 
 pub fn fill() -> super::Day {

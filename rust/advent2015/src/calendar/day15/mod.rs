@@ -2,12 +2,110 @@ use std::io::prelude::*;
 use std::fs::File;
 use std::path::Path;
 
+use std::boxed::Box;
+
+#[derive(Clone)]
+#[derive(Debug)]
+struct Ingredient {
+  name: String,
+  capacity: i32,
+  durability: i32,
+  flavor: i32,
+  texture: i32,
+  calories: i32,
+}
+
+impl Ingredient {
+  fn new(name: String, cap: i32, dur: i32, fla: i32, tex: i32, cal: i32) -> Ingredient {
+    Ingredient { name: name, capacity: cap, durability: dur, flavor: fla, texture: tex, calories: cal }
+  }
+}
+
+#[derive(Debug)]
+struct Mix {
+  ingredient: Ingredient,
+  count: u8,
+}
+
+impl Mix {
+  fn new(ing: Ingredient, count: u8) -> Mix {
+    Mix { ingredient: ing, count: count }
+  }
+}
+
+#[derive(Debug)]
+struct Recipe {
+  ingredient_mix: Box<Vec<Mix>>
+}
+
+impl Recipe {
+  fn new(ingredients: &Vec<Ingredient>) -> Recipe {
+    let mut ingredient_mix:Vec<Mix> = vec!();
+    for ingredient in ingredients {
+      ingredient_mix.push(Mix { ingredient: ingredient.clone(), count: 0 });
+    }
+    Recipe { ingredient_mix: Box::new(ingredient_mix) }
+  }
+
+  fn score(&self) -> i32 {
+    let mut capacity:i32 = 0;
+    let mut durability:i32 = 0;
+    let mut flavor:i32 = 0;
+    let mut texture:i32 = 0;
+    for mix in self.ingredient_mix.iter() {
+      capacity += mix.count as i32 * mix.ingredient.capacity;
+      durability += mix.count as i32 * mix.ingredient.durability;
+      flavor += mix.count as i32 * mix.ingredient.flavor;
+      texture += mix.count as i32 * mix.ingredient.texture;
+    }
+
+    return if capacity > 0 { capacity } else { 0 } *
+    if durability > 0 { durability } else { 0 } *
+    if flavor > 0 { flavor } else { 0 } *
+    if texture > 0 { texture } else { 0 };
+  }
+}
+
 fn part1 (input: String) -> String {
   let mut buffer = String::new();
   let mut f = File::open(Path::new(&input)).unwrap();
   let _ = f.read_to_string(&mut buffer);
 
-  return buffer;
+  let mut ingredients: Vec<Ingredient> = vec!();
+
+  let lines: Vec<&str> = buffer.lines().collect();
+  for line in lines {
+    let parts: Vec<&str> = line.split(' ').collect();
+
+    let name = parts[0].split(':').next().unwrap().to_string();
+    let capacity = parts[2].split(',').next().unwrap().parse::<i32>().unwrap();
+    let durability = parts[4].split(',').next().unwrap().parse::<i32>().unwrap();
+    let flavor = parts[6].split(',').next().unwrap().parse::<i32>().unwrap();
+    let texture = parts[8].split(',').next().unwrap().parse::<i32>().unwrap();
+    ingredients.push(Ingredient::new(name, capacity, durability, flavor, texture, 0));
+  }
+
+  println!("{:?}", ingredients);
+
+  let mut recipe:Recipe = Recipe::new(&ingredients);
+
+  println!("{:?}", recipe);
+
+  let mut high_score:i32 = 0;
+
+  for i in 0..101 {
+    for j in (100-i)..101 {
+      recipe.ingredient_mix[0].count = i;
+      recipe.ingredient_mix[1].count = 100 - i;
+
+      let score = recipe.score();
+      if score > high_score {
+        high_score = score;
+      }
+    }
+  }
+
+  return high_score.to_string();
 }
 
 fn part2 (input: String) -> String {

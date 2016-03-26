@@ -177,7 +177,7 @@ pub fn fill() -> super::Day {
 #[test]
 fn test_part1() {
   let day = fill();
-  assert_eq!((day.part1.run)(day.input.to_string()), "2696".to_string());
+  assert_eq!((day.part1.run)(day.input.to_string()), "18965440".to_string());
 }
 
 #[test]

@@ -22,18 +22,14 @@ impl Ingredient {
 }
 
 #[derive(Debug)]
+#[derive(Clone)]
 struct Mix {
   ingredient: Ingredient,
   count: u8,
 }
 
-impl Mix {
-  fn new(ing: Ingredient, count: u8) -> Mix {
-    Mix { ingredient: ing, count: count }
-  }
-}
-
 #[derive(Debug)]
+#[derive(Clone)]
 struct Recipe {
   ingredient_mix: Box<Vec<Mix>>
 }
@@ -66,6 +62,26 @@ impl Recipe {
   }
 }
 
+static mut high_score:i32 = 0;
+
+fn set_ingredient_mix(recipe:&mut Recipe, remainder:u8, index: u8) {
+  for i in 0..remainder {
+
+    recipe.ingredient_mix[index as usize].count = i;
+
+    if index+1 == recipe.ingredient_mix.len() as u8 {
+      unsafe {
+        let score = recipe.score();
+        if score > high_score {
+          high_score = score;
+        }
+      }
+    } else {
+      set_ingredient_mix(recipe, remainder - i, index + 1);
+    }
+  }
+}
+
 fn part1 (input: String) -> String {
   let mut buffer = String::new();
   let mut f = File::open(Path::new(&input)).unwrap();
@@ -85,27 +101,13 @@ fn part1 (input: String) -> String {
     ingredients.push(Ingredient::new(name, capacity, durability, flavor, texture, 0));
   }
 
-  println!("{:?}", ingredients);
-
   let mut recipe:Recipe = Recipe::new(&ingredients);
 
-  println!("{:?}", recipe);
+  set_ingredient_mix(&mut recipe, 101, 0);
 
-  let mut high_score:i32 = 0;
-
-  for i in 0..101 {
-    for j in (100-i)..101 {
-      recipe.ingredient_mix[0].count = i;
-      recipe.ingredient_mix[1].count = 100 - i;
-
-      let score = recipe.score();
-      if score > high_score {
-        high_score = score;
-      }
-    }
+  unsafe {
+    return high_score.to_string();
   }
-
-  return high_score.to_string();
 }
 
 fn part2 (input: String) -> String {

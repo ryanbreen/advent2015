@@ -60,24 +60,48 @@ impl Recipe {
     if flavor > 0 { flavor } else { 0 } *
     if texture > 0 { texture } else { 0 };
   }
+
+  fn calories(&self) -> i32 {
+    let mut calories:i32 = 0;
+    for mix in self.ingredient_mix.iter() {
+      calories += mix.count as i32 * mix.ingredient.calories;
+    }
+
+    return if calories > 0 { calories } else { 0 };
+  }
 }
 
-static mut high_score:i32 = 0;
-
-fn set_ingredient_mix(recipe:&mut Recipe, remainder:u8, index: u8) {
+fn set_ingredient_mix(high_score: &mut i32, recipe:&mut Recipe, remainder:u8, index: u8) {
   for i in 0..remainder {
 
     recipe.ingredient_mix[index as usize].count = i;
 
     if index+1 == recipe.ingredient_mix.len() as u8 {
-      unsafe {
+      let score = recipe.score();
+      if score > *high_score {
+        *high_score = score;
+      }
+    } else {
+      set_ingredient_mix(high_score, recipe, remainder - i, index + 1);
+    }
+  }
+}
+
+fn set_ingredient_mix_with_calorie_target(high_score: &mut i32, recipe:&mut Recipe, remainder:u8, index: u8) {
+  for i in 0..remainder {
+
+    recipe.ingredient_mix[index as usize].count = i;
+
+    if index+1 == recipe.ingredient_mix.len() as u8 {
+      let calories = recipe.calories();
+      if calories == 500 {
         let score = recipe.score();
-        if score > high_score {
-          high_score = score;
+        if score > *high_score {
+          *high_score = score;
         }
       }
     } else {
-      set_ingredient_mix(recipe, remainder - i, index + 1);
+      set_ingredient_mix_with_calorie_target(high_score, recipe, remainder - i, index + 1);
     }
   }
 }
@@ -101,13 +125,12 @@ fn part1 (input: String) -> String {
     ingredients.push(Ingredient::new(name, capacity, durability, flavor, texture, 0));
   }
 
+  let mut high_score:i32 = 0;
   let mut recipe:Recipe = Recipe::new(&ingredients);
 
-  set_ingredient_mix(&mut recipe, 101, 0);
+  set_ingredient_mix(&mut high_score, &mut recipe, 101, 0);
 
-  unsafe {
-    return high_score.to_string();
-  }
+  return high_score.to_string();
 }
 
 fn part2 (input: String) -> String {
@@ -115,7 +138,28 @@ fn part2 (input: String) -> String {
   let mut f = File::open(Path::new(&input)).unwrap();
   let _ = f.read_to_string(&mut buffer);
 
-  return buffer;
+  let mut ingredients: Vec<Ingredient> = vec!();
+
+  let lines: Vec<&str> = buffer.lines().collect();
+  for line in lines {
+    let parts: Vec<&str> = line.split(' ').collect();
+
+    let name = parts[0].split(':').next().unwrap().to_string();
+    let capacity = parts[2].split(',').next().unwrap().parse::<i32>().unwrap();
+    let durability = parts[4].split(',').next().unwrap().parse::<i32>().unwrap();
+    let flavor = parts[6].split(',').next().unwrap().parse::<i32>().unwrap();
+    let texture = parts[8].split(',').next().unwrap().parse::<i32>().unwrap();
+    let calories = parts[10].parse::<i32>().unwrap();
+    ingredients.push(Ingredient::new(name, capacity, durability, flavor, texture, calories));
+  }
+
+  let mut recipe:Recipe = Recipe::new(&ingredients);
+
+  let mut high_score:i32 = 0;
+
+  set_ingredient_mix_with_calorie_target(&mut high_score, &mut recipe, 101, 0);
+
+  return high_score.to_string();
 }
 
 pub fn fill() -> super::Day {
@@ -139,5 +183,5 @@ fn test_part1() {
 #[test]
 fn test_part2() {
   let day = fill();
-  assert_eq!((day.part2.run)(day.input.to_string()), "1084".to_string());
+  assert_eq!((day.part2.run)(day.input.to_string()), "15862900".to_string());
 }

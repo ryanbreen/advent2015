@@ -2,6 +2,7 @@ use std::io::prelude::*;
 use std::fs::File;
 use std::path::Path;
 use std::collections::HashSet;
+use std::iter::FromIterator;
 
 const TARGET:u8 = 150;
 
@@ -13,9 +14,6 @@ fn test_matches(matches: &mut HashSet<String>, current: String, total_match_coun
 
   if new_total == TARGET {
     if !matches.contains(&new_string) {
-
-      println!("Found match {}", new_string);
-
       *total_match_count += 1;
       matches.insert(new_string.clone());
     }
@@ -52,8 +50,6 @@ fn part1 (input: String) -> String {
   sizes.sort();
   sizes.reverse();
 
-  println!("{:?}", sizes);
-
   test_matches(&mut matches, "".to_string(), &mut total_matches, &sizes, 0, 0);
 
   return total_matches.to_string();
@@ -64,7 +60,36 @@ fn part2 (input: String) -> String {
   let mut f = File::open(Path::new(&input)).unwrap();
   let _ = f.read_to_string(&mut buffer);
 
-  return "no match".to_string();
+  let mut sizes:Vec<u8> = vec!();
+  let mut total_matches:u32 = 0;
+
+  let mut matches:HashSet<String> = HashSet::new();
+
+  let lines: Vec<&str> = buffer.lines().collect();
+  for line in lines {
+    sizes.push(line.parse::<u8>().unwrap());
+  }
+
+  sizes.sort();
+  sizes.reverse();
+
+  test_matches(&mut matches, "".to_string(), &mut total_matches, &sizes, 0, 0);
+
+  // Sort matches by count of -.
+  let mut match_vec = Vec::from_iter(matches.iter());
+  match_vec.sort_by(|a, b| a.split('-').count().cmp(&b.split('-').count()));
+
+  let mut count = 0;
+  let length = match_vec[0].split('-').count(); 
+  for entry in match_vec {
+    if length == entry.split('-').count() {
+      count += 1;
+    } else {
+      break;
+    }
+  }
+
+  return count.to_string();
 }
 
 pub fn fill() -> super::Day {
@@ -82,11 +107,11 @@ pub fn fill() -> super::Day {
 #[test]
 fn test_part1() {
   let day = fill();
-  assert_eq!((day.part1.run)(day.input.to_string()), "103".to_string());
+  assert_eq!((day.part1.run)(day.input.to_string()), "1638".to_string());
 }
 
 #[test]
 fn test_part2() {
   let day = fill();
-  assert_eq!((day.part2.run)(day.input.to_string()), "405".to_string());
+  assert_eq!((day.part2.run)(day.input.to_string()), "17".to_string());
 }

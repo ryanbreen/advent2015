@@ -145,7 +145,45 @@ fn part2 (input: String) -> String {
   let mut f = File::open(Path::new(&input)).unwrap();
   let _ = f.read_to_string(&mut buffer);
 
-  return "".to_string();
+  let mut game = Game::new();
+
+  let lines: Vec<&str> = buffer.lines().collect();
+  let mut row = 0;
+  for line in lines {
+    let mut col = 0;
+    for c in line.chars() {
+      game.grid[row][col] = c == '#';
+      col += 1;
+    }
+    row += 1;
+  }
+
+  for _ in 0..100 {
+    // Assert corners.
+    game.grid[0][0] = true;
+    game.grid[0][GRID_SIZE-1] = true;
+    game.grid[GRID_SIZE-1][0] = true;
+    game.grid[GRID_SIZE-1][GRID_SIZE-1] = true;
+
+    game.step();
+
+    // Assert corners.
+    game.grid[0][0] = true;
+    game.grid[0][GRID_SIZE-1] = true;
+    game.grid[GRID_SIZE-1][0] = true;
+    game.grid[GRID_SIZE-1][GRID_SIZE-1] = true;
+  }
+
+  let mut count = 0;
+  for x in 0..GRID_SIZE {
+    for y in 0..GRID_SIZE {
+      if game.grid[x][y] {
+        count += 1;
+      }
+    }
+  }
+
+  return count.to_string();
 }
 
 pub fn fill() -> super::Day {
@@ -169,5 +207,5 @@ fn test_part1() {
 #[test]
 fn test_part2() {
   let day = fill();
-  assert_eq!((day.part2.run)(day.input.to_string()), "17".to_string());
+  assert_eq!((day.part2.run)(day.input.to_string()), "924".to_string());
 }

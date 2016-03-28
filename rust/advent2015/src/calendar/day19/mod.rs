@@ -54,7 +54,6 @@ fn part1 (input: String) -> String {
   let target:String = lines[lines.len()-1].to_string();
   let mut replacements:Vec<Replacement> = vec!();
 
-  println!("Target molecule: {}", target);
   for i in 0..lines.len()-2 {
     let parts: Vec<&str> = lines[i].split(' ').collect();
 
@@ -64,12 +63,56 @@ fn part1 (input: String) -> String {
     });
   }
 
-  println!("Replacements: {:?}", replacements);
-
   let mut calibration_machine = CalibrationMachine::new();
   let count = calibration_machine.permute(&target, &replacements);
 
   return count.to_string();
+}
+
+struct MedicineMachine {
+}
+
+impl MedicineMachine {
+  fn new() -> Self {
+    MedicineMachine {}
+  }
+
+  fn permute(&mut self, steps:usize, target: &String, replacements: &Vec<Replacement>) -> usize {
+
+    if target == "e" {
+      return steps;
+    }
+
+    unsafe {
+      for replacement in replacements {
+
+        // Skip a replacement that won't work for us
+        if target.len() < replacement.to.len() {
+          continue;
+        }
+
+        for i in 0 .. target.len() - (replacement.to.len() - 1) {
+          if target.slice_unchecked(i, i+replacement.to.len()) == replacement.to {
+
+            let candidate = if i == 0 {
+              format!("{}{}", replacement.from, target.slice_unchecked(replacement.to.len(), target.len()))
+            } else if target.len() - replacement.to.len() == i {
+              format!("{}{}", target.slice_unchecked(0, i), replacement.from)
+            } else {
+              format!("{}{}{}", target.slice_unchecked(0, i), replacement.from, target.slice_unchecked(i+replacement.to.len(), target.len()))
+            };
+
+            let result = self.permute(steps + 1, &candidate, replacements);
+            if result != 0 {
+              return result;
+            }
+          }
+        }
+      }
+    }
+
+    return 0;
+  }
 }
 
 fn part2 (input: String) -> String {
@@ -77,7 +120,25 @@ fn part2 (input: String) -> String {
   let mut f = File::open(Path::new(&input)).unwrap();
   let _ = f.read_to_string(&mut buffer);
 
-  let mut count = 0;
+  let lines: Vec<&str> = buffer.lines().collect();
+
+  let target:String = lines[lines.len()-1].to_string();
+  let mut replacements:Vec<Replacement> = vec!();
+
+  for i in 0..lines.len()-2 {
+    let parts: Vec<&str> = lines[i].split(' ').collect();
+
+    replacements.push(Replacement {
+      from: parts[0].to_string(),
+      to: parts[2].to_string()
+    });
+  }
+
+  // Sort replacements so largest "from" is first.
+  replacements.sort_by(|a, b| a.from.len().cmp(&b.from.len()));
+
+  let mut medicine_machine = MedicineMachine::new();
+  let count = medicine_machine.permute(0, &target, &replacements);
 
   return count.to_string();
 }
@@ -97,11 +158,11 @@ pub fn fill() -> super::Day {
 #[test]
 fn test_part1() {
   let day = fill();
-  assert_eq!((day.part1.run)(day.input.to_string()), "814".to_string());
+  assert_eq!((day.part1.run)(day.input.to_string()), "518".to_string());
 }
 
 #[test]
 fn test_part2() {
   let day = fill();
-  assert_eq!((day.part2.run)(day.input.to_string()), "924".to_string());
+  assert_eq!((day.part2.run)(day.input.to_string()), "200".to_string());
 }

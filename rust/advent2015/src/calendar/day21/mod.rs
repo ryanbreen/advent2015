@@ -176,7 +176,6 @@ fn part2 (_: String) -> String {
           if !fight(&mut player, &mut boss) {
             let cost:u16 = weapon.cost as u16 + armor.cost as u16 + ring1.cost as u16 + ring2.cost as u16;
             if cost > highest_cost {
-              println!("{}\nWeapon: {:?}\nArmor: {:?}\nRing 1: {:?}\nRing 2: {:?}\n", cost, weapon, armor, ring1, ring2);
               highest_cost = cost;
             }
           }

@@ -73,51 +73,37 @@ impl Combatant {
 fn fight (player: &mut Combatant, boss: &mut Combatant) -> bool {
 
   loop {
-
-    // This is a definite loss.  Can't hug this bro to death.
-    if player.damage < boss.armor {
-      return false;
-    }
-
-    boss.current_hp -= (player.damage - boss.armor) as i8;
+    boss.current_hp -= player.damage as i8 - boss.armor as i8;
     if boss.current_hp <= 0 {
       return true;
     }
 
-    // This is a definite win.  Sweet hug, bro.
     if boss.damage < player.armor {
       return true;
     }
 
-    player.current_hp -= (boss.damage - player.armor) as i8;
+    player.current_hp -= boss.damage as i8 - player.armor as i8;
     if player.current_hp <= 0 {
       return false;
     }
   }
 }
 
-fn part1 (input: String) -> String {
+fn part1 (_: String) -> String {
   let mut boss:Combatant = Combatant::new(103, 9, 2);
 
   let mut player:Combatant = Combatant::new(100, 0, 0);
-
-  /*
-  let mut test_boss:Combatant = Combatant::new(12, 7, 2);
-  let mut test_player:Combatant = Combatant::new(8, 5, 5);
-  println!("Win? {}", fight(&mut test_player, &mut test_boss));
-  */
-
   let mut lowest_cost:u16 = 65535;
 
   for weapon in WEAPONS.into_iter() {
     for armor in ARMOR.into_iter() {
 
       let mut ring1_count = 0;
-      let mut ring2_count = 0;
 
       for ring1 in RINGS.into_iter() {
 
         ring1_count += 1;
+        let mut ring2_count = 0;
 
         for ring2 in RINGS.into_iter() {
 
@@ -155,8 +141,55 @@ fn part1 (input: String) -> String {
   return lowest_cost.to_string();
 }
 
-fn part2 (input: String) -> String {
-  return input;
+fn part2 (_: String) -> String {
+  let mut boss:Combatant = Combatant::new(103, 9, 2);
+
+  let mut player:Combatant = Combatant::new(100, 0, 0);
+  let mut highest_cost:u16 = 0;
+
+  //player.damage = 10;
+  //println!("{}", fight(&mut player, &mut boss));
+
+  for weapon in WEAPONS.into_iter() {
+    for armor in ARMOR.into_iter() {
+
+      let mut ring1_count = 0;
+
+      for ring1 in RINGS.into_iter() {
+
+        ring1_count += 1;
+        let mut ring2_count = 0;
+
+        for ring2 in RINGS.into_iter() {
+
+          ring2_count += 1;
+
+          if ring1_count == ring2_count {
+            continue;
+          }
+
+          player.apply_item(weapon);
+          player.apply_item(armor);
+          player.apply_item(ring1);
+          player.apply_item(ring2);
+
+          if !fight(&mut player, &mut boss) {
+            let cost:u16 = weapon.cost as u16 + armor.cost as u16 + ring1.cost as u16 + ring2.cost as u16;
+            if cost > highest_cost {
+              println!("{}\nWeapon: {:?}\nArmor: {:?}\nRing 1: {:?}\nRing 2: {:?}\n", cost, weapon, armor, ring1, ring2);
+              highest_cost = cost;
+            }
+          }
+
+          player.strip();
+          player.reset_hp();
+          boss.reset_hp();
+        }
+      }
+    }
+  }
+
+  return highest_cost.to_string();
 }
 
 pub fn fill() -> super::Day {
@@ -180,5 +213,5 @@ fn test_part1() {
 #[test]
 fn test_part2() {
   let day = fill();
-  assert_eq!((day.part2.run)(day.input.to_string()), "884520".to_string());
+  assert_eq!((day.part2.run)(day.input.to_string()), "201".to_string());
 }

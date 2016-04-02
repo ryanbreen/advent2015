@@ -123,6 +123,7 @@ struct Combatant {
   shield_remaining: u8,
   poison_remaining: u8,
   recharge_remaining: u8,
+  hardmode: bool,
 }
 
 impl Combatant {
@@ -137,6 +138,7 @@ impl Combatant {
       shield_remaining: 0,
       poison_remaining: 0,
       recharge_remaining: 0,
+      hardmode: false,
     }
   }
 
@@ -151,6 +153,7 @@ impl Combatant {
       shield_remaining: 0,
       poison_remaining: 0,
       recharge_remaining: 0,
+      hardmode: false,
     }
   }
 
@@ -198,6 +201,14 @@ impl Combatant {
 fn fight (player: &mut Combatant, boss: &mut Combatant, spells: &Vec<Box<&Spell>>) -> bool {
   
   for spell in spells {
+
+    if player.hardmode {
+      player.current_hp -= 1;
+      // Check player deadness
+      if player.current_hp <= 0 {
+        return false;
+      }
+    }
 
     // Apply player effects
     player.apply_player_effects();
@@ -311,9 +322,13 @@ fn part1 (_: String) -> String {
 }
 
 fn part2 (_: String) -> String {
-  let mut highest_cost:u16 = 0;
+  let mut boss:Combatant = Combatant::new_boss(71, 10);
 
-  return highest_cost.to_string();
+  let mut player:Combatant = Combatant::new_player(50, 500);
+  player.hardmode = true;
+
+  let lowest_cost:u16 = permute(&mut player, &mut boss);
+  return lowest_cost.to_string();
 }
 
 pub fn fill() -> super::Day {
@@ -331,7 +346,7 @@ pub fn fill() -> super::Day {
 #[test]
 fn test_part1() {
   let day = fill();
-  assert_eq!((day.part1.run)(day.input.to_string()), "121".to_string());
+  assert_eq!((day.part1.run)(day.input.to_string()), "1824".to_string());
 }
 
 #[test]

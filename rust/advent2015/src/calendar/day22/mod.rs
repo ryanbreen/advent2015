@@ -36,6 +36,7 @@ static SHIELD:Shield = Shield { cost: 113 };
 static POISON:Poison = Poison { cost: 173 };
 static RECHARGE:Recharge = Recharge { cost: 229 };
 
+#[allow(unused_variables)]
 impl Spell for MagicMissile {
   fn cast(&self, caster:&mut Combatant, target:&mut Combatant) {
     target.apply_damage(4);
@@ -50,6 +51,7 @@ impl Spell for MagicMissile {
   }
 }
 
+#[allow(unused_variables)]
 impl Spell for Drain {
   fn cast(&self, caster:&mut Combatant, target:&mut Combatant) {
     caster.current_hp += 2;
@@ -65,6 +67,7 @@ impl Spell for Drain {
   }
 }
 
+#[allow(unused_variables)]
 impl Spell for Shield {
   fn cast(&self, caster:&mut Combatant, target:&mut Combatant) {
     caster.shield_remaining = 6;
@@ -79,6 +82,7 @@ impl Spell for Shield {
   }
 }
 
+#[allow(unused_variables)]
 impl Spell for Poison {
   fn cast(&self, caster:&mut Combatant, target:&mut Combatant) {
     target.poison_remaining = 6;
@@ -93,6 +97,7 @@ impl Spell for Poison {
   }
 }
 
+#[allow(unused_variables)]
 impl Spell for Recharge {
   fn cast(&self, caster:&mut Combatant, target:&mut Combatant) {
     caster.recharge_remaining = 5;
@@ -297,44 +302,11 @@ fn permute(player: &mut Combatant, boss: &mut Combatant) -> u16 {
 }
 
 fn part1 (_: String) -> String {
-/*
-  let mut boss:Combatant = Combatant::new_boss(14, 8);
-
-  let mut player:Combatant = Combatant::new_player(10, 250);
-  let mut spells:Vec<Box<Spell>> = vec!();
-  spells.push(Box::new(POISON));
-  spells.push(Box::new(MAGIC_MISSILE));
-
-  spells.push(Box::new(RECHARGE));
-  spells.push(Box::new(SHIELD));
-  spells.push(Box::new(DRAIN));
-  spells.push(Box::new(POISON));
-  spells.push(Box::new(MAGIC_MISSILE));
-  println!("{}", fight(&mut player, &mut boss, &mut spells));
-*/
   let mut boss:Combatant = Combatant::new_boss(71, 10);
-
-  // Old node params
-  //let mut boss:Combatant = Combatant::new_boss(51, 9);
 
   let mut player:Combatant = Combatant::new_player(50, 500);
 
   let lowest_cost:u16 = permute(&mut player, &mut boss);
-  //let lowest_cost:u16 = 0;
-
-/* *
-  let mut spells:Vec<Box<&Spell>> = vec!();
-  spells.push(Box::new(&POISON));
-  spells.push(Box::new(&RECHARGE));
-  spells.push(Box::new(&MAGIC_MISSILE));
-  spells.push(Box::new(&MAGIC_MISSILE));
-  spells.push(Box::new(&POISON));
-  spells.push(Box::new(&SHIELD));
-  spells.push(Box::new(&MAGIC_MISSILE));
-  spells.push(Box::new(&MAGIC_MISSILE));
-  println!("{}", fight(&mut player, &mut boss, &spells));
-  */
-
   return lowest_cost.to_string();
 }
 

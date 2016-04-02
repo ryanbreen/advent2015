@@ -2,6 +2,7 @@
 trait Spell {
   fn cast(&self, caster:&mut Combatant, target:&mut Combatant);
   fn cost(&self) -> u8;
+  fn name(&self) -> &'static str;
 }
 
 #[derive(Debug)]
@@ -29,11 +30,11 @@ struct Recharge {
   cost: u8,
 }
 
-const MAGIC_MISSILE:MagicMissile = MagicMissile { cost: 53 };
-const DRAIN:Drain = Drain { cost: 73 };
-const SHIELD:Shield = Shield { cost: 113 };
-const POISON:Poison = Poison { cost: 173 };
-const RECHARGE:Recharge = Recharge { cost: 229 };
+static MAGIC_MISSILE:MagicMissile = MagicMissile { cost: 53 };
+static DRAIN:Drain = Drain { cost: 73 };
+static SHIELD:Shield = Shield { cost: 113 };
+static POISON:Poison = Poison { cost: 173 };
+static RECHARGE:Recharge = Recharge { cost: 229 };
 
 impl Spell for MagicMissile {
   fn cast(&self, caster:&mut Combatant, target:&mut Combatant) {
@@ -42,6 +43,10 @@ impl Spell for MagicMissile {
 
   fn cost(&self) -> u8 {
     self.cost
+  }
+
+  fn name(&self) -> &'static str {
+    "MagicMissile"
   }
 }
 
@@ -54,6 +59,10 @@ impl Spell for Drain {
   fn cost(&self) -> u8 {
     self.cost
   }
+
+  fn name(&self) -> &'static str {
+    "Drain"
+  }
 }
 
 impl Spell for Shield {
@@ -63,6 +72,10 @@ impl Spell for Shield {
 
   fn cost(&self) -> u8 {
     self.cost
+  }
+
+  fn name(&self) -> &'static str {
+    "Shield"
   }
 }
 
@@ -74,6 +87,10 @@ impl Spell for Poison {
   fn cost(&self) -> u8 {
     self.cost
   }
+
+  fn name(&self) -> &'static str {
+    "Poison"
+  }
 }
 
 impl Spell for Recharge {
@@ -84,6 +101,10 @@ impl Spell for Recharge {
   fn cost(&self) -> u8 {
     self.cost
   }
+
+  fn name(&self) -> &'static str {
+    "Recharge"
+  }
 }
 
 #[derive(Debug)]
@@ -93,6 +114,7 @@ struct Combatant {
   damage: u8,
   armor: u8,
   mana: u16,
+  current_mana: u16,
   shield_remaining: u8,
   poison_remaining: u8,
   recharge_remaining: u8,
@@ -106,6 +128,7 @@ impl Combatant {
       armor: 0,
       damage: damage,
       mana: 0,
+      current_mana: 0,
       shield_remaining: 0,
       poison_remaining: 0,
       recharge_remaining: 0,
@@ -119,6 +142,7 @@ impl Combatant {
       armor: 0,
       damage: 0,
       mana: mana,
+      current_mana: mana,
       shield_remaining: 0,
       poison_remaining: 0,
       recharge_remaining: 0,
@@ -138,13 +162,15 @@ impl Combatant {
     if self.shield_remaining > 0 {
       self.shield_remaining -= 1;
       self.armor = 7;
-    } else if self.shield_remaining == 0 {
+    }
+
+    if self.shield_remaining == 0 {
       self.armor = 0;
     }
 
     if self.recharge_remaining > 0 {
       self.recharge_remaining -= 1;
-      self.mana += 101;
+      self.current_mana += 101;
     }
 
   }
@@ -158,12 +184,13 @@ impl Combatant {
 
   fn reset(&mut self) {
     self.current_hp = self.hp as i8;
+    self.current_mana = self.mana;
     self.shield_remaining = 0;
     self.poison_remaining = 0;
   }
 }
 
-fn fight (player: &mut Combatant, boss: &mut Combatant, spells: &Vec<Box<Spell>>) -> bool {
+fn fight (player: &mut Combatant, boss: &mut Combatant, spells: &Vec<Box<&Spell>>) -> bool {
   
   for spell in spells {
 
@@ -173,16 +200,16 @@ fn fight (player: &mut Combatant, boss: &mut Combatant, spells: &Vec<Box<Spell>>
     // Apply boss effects
     boss.apply_boss_effects();
 
-    if player.mana < spell.cost() as u16 {
+    if player.current_mana < spell.cost() as u16 {
       return false;
     }
 
     // Cast
     spell.cast(player, boss);
 
-    player.mana -= spell.cost() as u16;
+    player.current_mana -= spell.cost() as u16;
 
-    println!("After player turn\nplayer: {:?}\nboss: {:?}", player, boss);
+    //println!("After player turn\nplayer: {:?}\nboss: {:?}", player, boss);
 
     // Check boss deadness
     if boss.current_hp <= 0 {
@@ -203,7 +230,7 @@ fn fight (player: &mut Combatant, boss: &mut Combatant, spells: &Vec<Box<Spell>>
     // Boss attack
     player.apply_damage(boss.damage);
 
-    println!("\tAfter boss turn\n\tplayer: {:?}\n\tboss: {:?}", player, boss);
+    //println!("\tAfter boss turn\n\tplayer: {:?}\n\tboss: {:?}", player, boss);
 
     // Check player deadness
     if player.current_hp <= 0 {
@@ -214,25 +241,100 @@ fn fight (player: &mut Combatant, boss: &mut Combatant, spells: &Vec<Box<Spell>>
   false
 }
 
+fn permute_n_spells(spells: &mut Vec<Box<&Spell>>,
+  player:&mut Combatant, boss:&mut Combatant,
+  n: u8, max: u8, lowest: &mut i16) {
+
+  for spell_number in 0..5 {
+    let spell:Box<&Spell> = match spell_number {
+      0 => Box::new(&MAGIC_MISSILE),
+      1 => Box::new(&DRAIN),
+      2 => Box::new(&SHIELD),
+      3 => Box::new(&POISON),
+      4 => Box::new(&RECHARGE),
+      _ => panic!("Math failed me"),
+    };
+
+    spells[(n as usize)-1] = spell;
+
+    if n == max {
+      // We have a full populated spell array, so run this mug.
+      if fight(player, boss, spells) {
+        let mut cost:u16 = 0;
+        for my_spell in spells.iter() {
+          cost += my_spell.cost() as u16;
+        }
+
+        if *lowest == -1 || cost < *lowest as u16 {
+          *lowest = cost as i16;
+        }
+      }
+
+      // After every fight, reset player and boss
+      boss.reset();
+      player.reset();
+    } else {
+      permute_n_spells(spells, player, boss, n+1, max, lowest);
+    }
+  }
+}
+
+fn permute(player: &mut Combatant, boss: &mut Combatant) -> u16 {
+  let mut spell_count:u8 = 1;
+  loop {
+    let mut spells:Vec<Box<&Spell>> = vec!();
+    spells.resize(spell_count as usize, Box::new(&MAGIC_MISSILE));
+    let mut lowest:i16 = -1;
+    permute_n_spells(&mut spells, player, boss, 1, spell_count, &mut lowest);
+    if lowest != -1 {
+      return lowest as u16;
+    }
+
+    println!("No matches at size {}", spell_count);
+
+    spell_count += 1;
+  }
+}
+
 fn part1 (_: String) -> String {
+/*
   let mut boss:Combatant = Combatant::new_boss(14, 8);
 
   let mut player:Combatant = Combatant::new_player(10, 250);
-
   let mut spells:Vec<Box<Spell>> = vec!();
-/*
   spells.push(Box::new(POISON));
   spells.push(Box::new(MAGIC_MISSILE));
-*/
+
   spells.push(Box::new(RECHARGE));
   spells.push(Box::new(SHIELD));
   spells.push(Box::new(DRAIN));
   spells.push(Box::new(POISON));
   spells.push(Box::new(MAGIC_MISSILE));
-
   println!("{}", fight(&mut player, &mut boss, &mut spells));
+*/
+  let mut boss:Combatant = Combatant::new_boss(71, 10);
 
-  let mut lowest_cost:u16 = 65535;
+  // Old node params
+  //let mut boss:Combatant = Combatant::new_boss(51, 9);
+
+  let mut player:Combatant = Combatant::new_player(50, 500);
+
+  let lowest_cost:u16 = permute(&mut player, &mut boss);
+  //let lowest_cost:u16 = 0;
+
+/* *
+  let mut spells:Vec<Box<&Spell>> = vec!();
+  spells.push(Box::new(&POISON));
+  spells.push(Box::new(&RECHARGE));
+  spells.push(Box::new(&MAGIC_MISSILE));
+  spells.push(Box::new(&MAGIC_MISSILE));
+  spells.push(Box::new(&POISON));
+  spells.push(Box::new(&SHIELD));
+  spells.push(Box::new(&MAGIC_MISSILE));
+  spells.push(Box::new(&MAGIC_MISSILE));
+  println!("{}", fight(&mut player, &mut boss, &spells));
+  */
+
   return lowest_cost.to_string();
 }
 

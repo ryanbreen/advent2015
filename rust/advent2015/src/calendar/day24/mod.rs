@@ -75,7 +75,35 @@ fn part2 (input: String) -> String {
   let mut buffer = String::new();
   let mut f = File::open(Path::new(&input)).unwrap();
   let _ = f.read_to_string(&mut buffer);
-  return input;
+
+  let lines: Vec<&str> = buffer.lines().collect();
+  let mut numbers: Vec<u8> = vec!();
+
+  let mut total:usize = 0;
+  for line in lines {
+    let num = line.parse::<u8>().unwrap();
+    numbers.push(num);
+    total += num as usize;
+  }
+
+  let partition:usize = total / 4;
+
+  numbers.sort();
+  //numbers.reverse();
+  println!("{:?}", numbers);
+
+  let mut lowest_qe:u64 = 0xFFFFFFFFFFFFFFFF;
+
+  for i in 1..10 {
+    test(&numbers, 0, 1, 0, partition, 0, i, &mut lowest_qe);
+    if lowest_qe != 0xFFFFFFFFFFFFFFFF {
+      break;
+    } else {
+      println!("No match at size {}", i);
+    }
+  }
+
+  return lowest_qe.to_string();
 }
 
 pub fn fill() -> super::Day {

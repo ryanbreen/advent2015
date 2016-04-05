@@ -23,6 +23,7 @@ mod day21;
 mod day22;
 mod day23;
 mod day24;
+mod day25;
 
 pub struct Puzzle {
   pub run: fn(String) -> String
@@ -69,6 +70,7 @@ impl Calendar {
     days.push(day22::fill());
     days.push(day23::fill());
     days.push(day24::fill());
+    days.push(day25::fill());
 
     Calendar {
       days: days
